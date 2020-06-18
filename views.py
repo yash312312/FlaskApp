@@ -79,9 +79,13 @@ def total_revenue(city_t, state):
 
 def calc_revenue(city_t2, d1, d2):
     s = 0
-    c = pd.date_range(start=d1, end=d2, freq='MS').strftime("%m/%d/%Y")
     city_t2.set_index('index', inplace=True)
+    if not date_check(str(city_t2.columns[0]), d1):
+        c = pd.date_range(start=str(city_t2.columns[0]), end=d2, freq='MS').strftime("%m/%d/%Y")
+    else:
+        c = pd.date_range(start=d1, end=d2, freq='MS').strftime("%m/%d/%Y")
     print(city_t2)
+
     for i in c:
         s = s + int(city_t2.loc['Total', i])
     city_t2.reset_index(inplace=True)
@@ -108,6 +112,8 @@ def calc_state_revenue(state, l, name):
     sum = 0
     print(state_cost)
     for i in l:
+        if not table_exists("%s_data"%i):
+            continue
         city = pd.read_sql('%s_data' % i, db)
         if date_check(str(city.columns[1]), d1):
             c = pd.date_range(start=d1, end=d2, freq='MS').strftime("%m/%d/%Y")
@@ -187,9 +193,60 @@ def up_route():
                            )
 
 
-@app.route("/bihar")
+@app.route("/bihar", methods=['GET', 'POST'])
 def bihar_route():
-    return render_template('bihar.html')
+    if not table_exists('bihar_data'):
+        cursor.execute(
+            "CREATE TABLE bihar_data (name VARCHAR(255) , cost DOUBLE)")
+        connection.commit()
+    temp = pd.read_sql_table('bihar_data', con=db)
+    revenue = 0
+    if 'ssd' in session:
+        session.pop('ssd', None)
+    if 'sed' in session:
+        session.pop('sed', None)
+    if request.method == 'POST':
+        if request.form['btn'] == 'add':
+            product_name = request.form.get('product_name')
+            product_cost = request.form.get('product_cost')
+            if not product_name or not product_cost or product_name in str(temp['name']):
+                error = 'Invalid Values'
+                return render_template('bihar.html', tables=[
+                    temp.to_html(classes='table table-bordered', col_space=150, index=False, table_id='dataTable',
+                                 justify='center')], titles=temp.columns.values, listOfPro=(temp['name']),
+                                       revenue=revenue,
+                                       ssd=session['ssd'] if 'ssd' in session else None,
+                                       sed=session['sed'] if 'sed' in session else None,
+                                       set_product=session['set_p'] if 'set_p' in session else None)
+
+            cursor.execute('''INSERT into bihar_data (name, cost)
+                             values (%s, %s)''',
+                           (product_name, product_cost))
+            connection.commit()
+        elif request.form['btn'] == 'revenue_product':
+            if 'ssd' in session:
+                session.pop('ssd', None)
+            if 'sed' in session:
+                session.pop('sed', None)
+            if 'set_p' in session:
+                session.pop('set_p', None)
+            session['set_p'] = request.form.get('product_revenue')
+            session['ssd'] = request.form.get('start_date')
+            session['sed'] = request.form.get('end_date')
+            if pd.Timestamp(session['ssd']) > pd.Timestamp(session['sed']):
+                revenue = 'Illegal Date'
+            else:
+                l = ['patna']
+                revenue = calc_state_revenue('bihar', l, session['set_p'])
+                print(revenue)
+    temp = pd.read_sql_table('bihar_data', con=db)
+    return render_template('bihar.html', tables=[
+        temp.to_html(classes='table table-bordered', col_space=150, index=False, table_id='dataTable',
+                     justify='center')], titles=temp.columns.values, listOfPro=(temp['name']), revenue=revenue,
+                           ssd=session['ssd'] if 'ssd' in session else None,
+                           sed=session['sed'] if 'sed' in session else None,
+                           set_product=session['set_p'] if 'set_p' in session else None
+                           )
 
 
 @app.route("/delhi")
@@ -242,6 +299,10 @@ def lucknow_route():
     if not table_exists('lucknow_data'):
         session['city'] = 'lucknow'
         return redirect(url_for('form_shop'))
+    if 'sd' in session:
+        session.pop('sd', None)
+    if 'ed' in session:
+        session.pop('ed', None)
     if request.method == 'POST':
         if request.form['btn'] == 'add':
             session['city'] = 'lucknow'
@@ -260,11 +321,20 @@ def lucknow_route():
     city_t.reset_index(inplace=True)
     if request.method == 'POST':
         if request.form['btn'] == 'revenue':
+            if 'sd' in session:
+                session.pop('sd', None)
+            if 'ed' in session:
+                session.pop('ed', None)
             d1 = request.form.get('start_date')
             d2 = request.form.get('end_date')
             session['sd'] = d1
             session['ed'] = d2
-            revenue = calc_revenue(city_t2, d1, d2)
+            if not d1 or not d2:
+                revenue = 'Illegal Date'
+            elif pd.Timestamp(session['sd']) > pd.Timestamp(session['ed']):
+                revenue = 'Illegal Date'
+            else:
+                revenue = calc_revenue(city_t2, d1, d2)
     return render_template('lucknow.html', tables=[
         city_t.to_html(classes='table table-bordered', col_space=150, index=False, table_id='dataTable',
                        justify='center'),
@@ -278,6 +348,10 @@ def gorakhpur_route():
     if not table_exists('gorakhpur_data'):
         session['city'] = 'gorakhpur'
         return redirect(url_for('form_shop'))
+    if 'sd' in session:
+        session.pop('sd', None)
+    if 'ed' in session:
+        session.pop('ed', None)
     if request.method == 'POST':
         if request.form['btn'] == 'add':
             session['city'] = 'gorakhpur'
@@ -296,13 +370,66 @@ def gorakhpur_route():
     city_t.reset_index(inplace=True)
     if request.method == 'POST':
         if request.form['btn'] == 'revenue':
+            if 'sd' in session:
+                session.pop('sd', None)
+            if 'ed' in session:
+                session.pop('ed', None)
             d1 = request.form.get('start_date')
             d2 = request.form.get('end_date')
             session['sd'] = d1
             session['ed'] = d2
-            revenue = calc_revenue(city_t2, d1, d2)
-
+            if not d1 or not d2:
+                revenue = 'Illegal Date'
+            elif pd.Timestamp(session['sd']) > pd.Timestamp(session['ed']):
+                revenue = 'Illegal Date'
+            else:
+                revenue = calc_revenue(city_t2, d1, d2)
     return render_template('gorakhpur.html', tables=[
+        city_t.to_html(classes='table table-bordered', col_space=150, index=False, table_id='dataTable',
+                       justify='center'),
+        city_t2.to_html(classes='table table-bordered', col_space=150, index=False, table_id='dataTable',
+                        justify='center')], titles=city_t.columns.values, listOfPro=product_in_city, revenue=revenue,
+                           sd=session['sd'] if 'sd' in session else None, ed=session['ed'] if 'ed' in session else None)
+
+
+@app.route("/patna", methods=['POST', 'GET'])
+def patna_route():
+    if not table_exists('patna_data'):
+        session['city'] = 'patna'
+        return redirect(url_for('form_shop'))
+    if request.method == 'POST':
+        if request.form['btn'] == 'add':
+            if 'city' in session:
+                session.pop('city', None)
+            if 'state' in session:
+                session.pop('state', None)
+            session['city'] = 'patna'
+            session['state'] = 'bihar'
+            city_t = pd.read_sql_table('patna_data', con=db)
+            session['date'] = '%s' % city_t.columns[1]
+            return redirect(url_for('form_product'))
+        if request.form['btn'] == 'delete':
+            product_to_delete = request.form.get('delete_product')
+            delete_product('patna', product_to_delete)
+    city_t = pd.read_sql_table('patna_data', con=db)
+    state_t = pd.read_sql_table('bihar_data', con=db)
+    product_in_city = set(z[9:-6] for z in city_t['Shops and Units'][1:])
+    revenue = 0
+    city_t2 = total_revenue(city_t, state_t)
+    city_t.reset_index(inplace=True)
+    if request.method == 'POST':
+        if request.form['btn'] == 'revenue':
+            d1 = request.form.get('start_date')
+            d2 = request.form.get('end_date')
+            session['sd'] = d1
+            session['ed'] = d2
+            if not d1 or not d2:
+                revenue = 'Illegal Date'
+            elif pd.Timestamp(session['sd']) > pd.Timestamp(session['ed']):
+                revenue = 'Illegal Date'
+            else:
+                revenue = calc_revenue(city_t2, d1, d2)
+    return render_template('patna.html', tables=[
         city_t.to_html(classes='table table-bordered', col_space=150, index=False, table_id='dataTable',
                        justify='center'),
         city_t2.to_html(classes='table table-bordered', col_space=150, index=False, table_id='dataTable',
@@ -354,7 +481,7 @@ def form_product():
         return redirect(url_for("%s_route" % session['city']))
     city_t = pd.read_sql_table('%s_data' % session['city'], con=db)
     product_in_city = set(z[9:-6] for z in city_t['Shops and Units'][1:])
-    state_t = pd.read_sql_table('up_data' % ['state'], con=db)
+    state_t = pd.read_sql_table('%s_data' % session['state'], con=db)
     product_in_state = set(state_t['name'])
     list_of_pro_to_be_added = product_in_state - product_in_city
     return render_template('form_product.html', listOfPro=list_of_pro_to_be_added, city=session['city'].capitalize())

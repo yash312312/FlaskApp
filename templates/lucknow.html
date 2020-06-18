@@ -51,7 +51,7 @@
         <hr class="sidebar-divider my-0">
         <p></p>
         <hr class="sidebar-divider my-0">
-        <form style="text-align: center;" action="/lucknow" method="POST">
+        <form style="text-align: center;" action="/lucknow"  method="POST">
             <div class="form-group">
                 <label for="delete_product" class="text-white">Delete Product</label>
                 <select class="form-control" id="delete_product" name="delete_product">
@@ -68,7 +68,7 @@
         <div class="row">
             <div class="card shadow col-12 ">
                 <a href="#product_table" class="d-block card-header py-3" data-toggle="collapse" role="button"
-                   aria-expanded="true" aria-controls="collapseCardExample">
+                    aria-controls="product_table">
                     <h6 class="m-0 font-weight-bold text-primary">Data Table</h6>
 
                 </a>
@@ -78,7 +78,7 @@
                     </span>
                     <span class="text">Back to State Page</span>
                   </a>
-                <div class="collapse show" id="product_table">
+                <div class="collapse" id="product_table">
                     <div class="card-body">
                         <div class="table-responsive">
                             {% for table in tables %}
@@ -93,14 +93,14 @@
         <div class="row">
             <div class="card shadow col-12">
                 <!-- Card Header - Accordion -->
-                <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse" role="button"
-                   aria-expanded="true" aria-controls="collapseCardExample">
+                <a href="#revenue_card" class="d-block card-header py-3" data-toggle="collapse" role="button"
+                   aria-expanded="false" aria-controls="revenue_card">
                     <h6 class="m-0 font-weight-bold text-primary">Revenue Calculation</h6>
                 </a>
-                <div class="collapse show" id="collapseCardExample">
+                <div class="collapse show" id="revenue_card">
                     <!-- Card Content - Collapse -->
 
-                    <form class="needs-validation justify-content-center" action="#" method="POST">
+                    <form class="needs-validation justify-content-center" method="POST">
                         <div class="form-row justify-content-center">
                             <div class="col-md-4 mb-3">
                                 <label for="start_date">Start Date</label>
@@ -123,20 +123,13 @@
                 </div>
             </div>
         </div>
+
     </div>
 </div>
-<script>
+    <script>
 if ( window.history.replaceState ) {
   window.history.replaceState( null, null, window.location.href );
 }
-
-
-
-
-
-
-
-
 </script>
 
 {% endblock %}

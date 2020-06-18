@@ -1,15 +1,18 @@
-  {% extends "layout.html" %}
+{% extends "layout.html" %}
 {% block body %}
-<body>
-	<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-      <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
-        <div class="sidebar-brand-icon rotate-n-15">
-          <i class="fas fa-laugh-wink"></i>
-        </div>
-        <div class="sidebar-brand-text mx-3">Quami Consumer Products ></div>
-      </a>
+<body id="page-top">
+<div id="wrapper">
+
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+        <!-- Sidebar - Brand -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+            <div class="sidebar-brand-icon rotate-n-15">
+                <i class="fas fa-laugh-wink"></i>
+            </div>
+            <div class="sidebar-brand-text mx-3">Quami Consumer Products ></div>
+        </a>
 
       <!-- Divider -->
       <hr class="sidebar-divider my-0">
@@ -24,7 +27,6 @@
 	    <a class="dropdown-item" href="/">Home</a>
 	  </div>
 	</div>
-
       <!-- Sidebar Toggler (Sidebar) -->
        <hr class="sidebar-divider my-0">
         <p></p>
@@ -34,10 +36,84 @@
 		    Choose City
 		  </button>
 		  <div class="dropdown-menu">
-		    <a class="dropdown-item" href="patna.html">Patna</a>
+		    <a class="dropdown-item" href="/patna">Patna</a>
 		  </div>
 		</div>
 		<hr class="sidebar-divider my-0">
+		<form style="text-align: center;" action="/bihar" method="POST">
+            <div class="form-group">
+                <label for="product_name" class="text-white">Add Product</label>
+                <input type="text" class="form-control" id="product_name" name="product_name"
+                       placeholder="Enter Product Name">
+            </div>
+            <div class="form-group">
+                <label for="product_cost" class="text-white">Cost</label>
+                <input type="number" step="'0.01" class="form-control" id="product_cost" name="product_cost">
+            </div>
+            <button type="submit" class="btn btn-primary" name="btn" value="add">Add</button>
+        </form>
     </ul>
+    <div class="container ml-0 pl-3 ">
+        <div class="row">
+            <div class="card shadow col-6">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        {% for table in tables %}
+                        {{titles[loop.index]}}
+                        {{ table|safe }}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow col-6">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Revenue of Product</h6>
+                </div>
+                <form class="needs-validation justify-content-center" method="POST" >
+                    <div class="form-row justify-content-center">
+                        <div class="col-md-6 mb-3">
+                            <label for="start_date">Start Date</label>
+                            <input type="month" class="form-control" id="start_date"
+                                   name="start_date" value="{{ssd if ssd}}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="end_date">End Date</label>
+                            <input type="month" class="form-control" id="end_date"
+                                   name="end_date" value="{{sed if sed}}" required>
+                        </div>
+                    </div>
+                    <div class="form-row justify-content-center">
+                        <div class="col-md-6 mb-3">
+                            <label for="product_name">Product Name</label>
+                            <select class="form-control" id="product_revenue" name="product_revenue">
+                                {% for product in listOfPro %}
+                                <option value="{{product}}" SELECTED>{{product}}</option>
+                                {% endfor %}
+                                <option value="{{set_product}}" SELECTED>{{set_product}}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 my-auto">
+                            <button class="btn btn-primary" type="submit" name="btn" value="revenue_product" id="click">
+                                Show
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3 my-auto">
+                        Total Revenue = {{revenue}}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+if ( window.history.replaceState ) {
+  window.history.replaceState( null, null, window.location.href );
+}
 
-	 {% endblock %}
+
+</script>
+{% endblock %}
