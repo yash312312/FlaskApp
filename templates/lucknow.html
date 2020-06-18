@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+{% block body %}
+<body id="page-top">
+<div id="wrapper">
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+        <!-- Sidebar - Brand -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+            <div class="sidebar-brand-icon rotate-n-15">
+                <i class="fas fa-laugh-wink"></i>
+            </div>
+            <div class="sidebar-brand-text mx-3">Quami Consumer Products</div>
+        </a>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0">
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false">
+                UP
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="/bihar">Bihar</a>
+                <a class="dropdown-item" href="/delhi">Delhi NCR</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/">Home</a>
+            </div>
+        </div>
+        <hr class="sidebar-divider my-0">
+        <!-- Sidebar Toggler (Sidebar) -->
+        <p></p>
+        <hr class="sidebar-divider my-0">
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false">
+                Lucknow
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="/gorakhpur">Gorakhpur</a>
+            </div>
+        </div>
+        <hr class="sidebar-divider my-0">
+        <p></p>
+        <hr class="sidebar-divider my-0">
+        <hr class="sidebar-divider my-0">
+        <p></p>
+        <hr class="sidebar-divider my-0">
+        <form method="POST" style="text-align: center;">
+            <button type="submit" class="btn btn-primary" name="btn" value="add">Add Product</button>
+        </form>
+        <hr class="sidebar-divider my-0">
+        <p></p>
+        <hr class="sidebar-divider my-0">
+        <form style="text-align: center;" action="/lucknow" method="POST">
+            <div class="form-group">
+                <label for="delete_product" class="text-white">Delete Product</label>
+                <select class="form-control" id="delete_product" name="delete_product">
+                    {% for product in listOfPro %}
+                    <option value="{{product}}" SELECTED>{{product}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" name="btn" value="delete">Delete</button>
+        </form>
+
+    </ul>
+    <div class="container ml-0 pl-3">
+        <div class="row">
+            <div class="card shadow col-12 ">
+                <a href="#product_table" class="d-block card-header py-3" data-toggle="collapse" role="button"
+                   aria-expanded="true" aria-controls="collapseCardExample">
+                    <h6 class="m-0 font-weight-bold text-primary">Data Table</h6>
+
+                </a>
+               <a href="/up" class="btn btn-light btn-icon-split">
+                    <span class="icon text-gray-600">
+                      <i class="fas fa-arrow-right"></i>
+                    </span>
+                    <span class="text">Back to State Page</span>
+                  </a>
+                <div class="collapse show" id="product_table">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            {% for table in tables %}
+                            {{titles[loop.index]}}
+                            {{ table|safe }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="card shadow col-12">
+                <!-- Card Header - Accordion -->
+                <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse" role="button"
+                   aria-expanded="true" aria-controls="collapseCardExample">
+                    <h6 class="m-0 font-weight-bold text-primary">Revenue Calculation</h6>
+                </a>
+                <div class="collapse show" id="collapseCardExample">
+                    <!-- Card Content - Collapse -->
+
+                    <form class="needs-validation justify-content-center" action="#" method="POST">
+                        <div class="form-row justify-content-center">
+                            <div class="col-md-4 mb-3">
+                                <label for="start_date">Start Date</label>
+                                <input type="month" class="form-control" id="start_date"
+                                       name="start_date" value="{{sd if sd}}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="end_date">End Date</label>
+                                <input type="month" class="form-control" id="end_date"
+                                       name="end_date" value="{{ed if ed}}">
+                            </div>
+                            <div class="col-md-1 my-auto">
+                                <button class="btn btn-primary" type="submit" name="btn" value="revenue">Show</button>
+                            </div>
+                            <div class="col-md-3 my-auto">
+                                {{revenue}}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+if ( window.history.replaceState ) {
+  window.history.replaceState( null, null, window.location.href );
+}
+
+
+
+
+
+
+
+
+</script>
+
+{% endblock %}

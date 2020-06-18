@@ -1,0 +1,43 @@
+  {% extends "layout.html" %}
+{% block body %}
+<body>
+	<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+      <!-- Sidebar - Brand -->
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+        <div class="sidebar-brand-icon rotate-n-15">
+          <i class="fas fa-laugh-wink"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">Quami Consumer Products ></div>
+      </a>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider my-0">
+	<div class="btn-group">
+	  <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	    Bihar
+	  </button>
+	  <div class="dropdown-menu">
+	    <a class="dropdown-item" href="/up">UP</a>
+	    <a class="dropdown-item" href="/delhi">Delhi NCR</a>
+	    <div class="dropdown-divider"></div>
+	    <a class="dropdown-item" href="/">Home</a>
+	  </div>
+	</div>
+
+      <!-- Sidebar Toggler (Sidebar) -->
+       <hr class="sidebar-divider my-0">
+        <p></p>
+    <hr class="sidebar-divider my-0">
+	<div class="btn-group">
+		  <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    Choose City
+		  </button>
+		  <div class="dropdown-menu">
+		    <a class="dropdown-item" href="patna.html">Patna</a>
+		  </div>
+		</div>
+		<hr class="sidebar-divider my-0">
+    </ul>
+
+	 {% endblock %}
