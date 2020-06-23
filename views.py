@@ -1,5 +1,4 @@
-from app import app, pd, db, render_template, request, fin, dates, df, cursor, connection, redirect, url_for, np, \
-    session
+from app import app, pd, db, render_template, request, fin, cursor, connection, redirect, url_for, np, session
 
 app.secret_key = "hello"
 
@@ -13,10 +12,6 @@ def add_product(n, d, sd, q, iu, gr, mu):
     iu = int(iu)
     gr = int(gr)
     mu = int(mu)
-    # global pro_list
-    # global st_dates
-    # pro_list.append(name)
-    # st_dates.append(date)
     c = pd.date_range(sd, end='2024-12-31', freq='MS')
     c = c.insert(0, 'Shops and Units')
     new_df = pd.DataFrame(columns=c)
@@ -112,7 +107,7 @@ def calc_state_revenue(state, l, name):
     sum = 0
     print(state_cost)
     for i in l:
-        if not table_exists("%s_data"%i):
+        if not table_exists("%s_data" % i):
             continue
         city = pd.read_sql('%s_data' % i, db)
         if date_check(str(city.columns[1]), d1):
@@ -254,46 +249,6 @@ def delhi_route():
     return render_template('delhi.html')
 
 
-# @app.route("/lucknow", methods=['POST', 'GET'])
-# def lucknow_route():
-#     list_of_pro_to_be_added = []
-#     if table_exists('up_data'):
-#         temp1 = pd.read_sql_table('up_data', con=db)
-#         list_of_pro_to_be_added = list(temp1['name'])
-#     if not table_exists('lucknow_data'):
-#         df.to_sql(con=db, name='lucknow_data', if_exists='append', index=False)
-#     if (request.method == 'POST'):
-#         if request.form['btn'] == 'add':
-#             name = request.form.get('product_name')
-#             date = request.form.get('launch_date')
-#             quarterly = request.form.get('quarterly')
-#             if not name or not date:
-#                 temp = pd.read_sql_table('lucknow_data', db)
-#                 k = list(temp['Shops and Units'][1:])
-#                 return render_template('lucknow.html', tables=[temp.to_html(classes='data')],
-#                                        titles=temp.columns.values,
-#                                        listOfPro=k, listOfProToBeAdded=list_of_pro_to_be_added)
-#
-#             print(name)
-#             print(date)
-#             new_df = add_product(name, date, quarterly)
-#             new_df.to_sql(con=db, name='lucknow_data', if_exists='append', index_label='Shops and Units')
-#         if request.form['btn'] == 'delete':
-#             product_to_delete = request.form.get('delete_product')
-#             col_name = 'Shops and Units'
-#             print("DELETE FROM lucknow_data WHERE `%s` = '%s'" % (col_name, product_to_delete))
-#             query = "DELETE FROM lucknow_data WHERE `%s` = '%s'" % (col_name, product_to_delete)
-#             cursor.execute(query)
-#             connection.commit()
-#     temp = pd.read_sql_table('lucknow_data', db)
-#     k = list(temp['Shops and Units'][1:])
-#
-#     print(k)
-#     return render_template('lucknow.html', tables=[temp.to_html(classes='data')], titles=temp.columns.values,
-#                            listOfPro=k, listOfProToBeAdded=list_of_pro_to_be_added)
-#
-
-######
 @app.route("/lucknow", methods=['POST', 'GET'])
 def lucknow_route():
     if not table_exists('lucknow_data'):
