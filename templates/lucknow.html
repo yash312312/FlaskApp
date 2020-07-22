@@ -51,7 +51,7 @@
         <hr class="sidebar-divider my-0">
         <p></p>
         <hr class="sidebar-divider my-0">
-        <form style="text-align: center;" action="/lucknow"  method="POST">
+        <form style="text-align: center;" action="/lucknow" method="POST">
             <div class="form-group">
                 <label for="delete_product" class="text-white">Delete Product</label>
                 <select class="form-control" id="delete_product" name="delete_product">
@@ -68,16 +68,16 @@
         <div class="row">
             <div class="card shadow col-12 ">
                 <a href="#product_table" class="d-block card-header py-3" data-toggle="collapse" role="button"
-                    aria-controls="product_table">
+                   aria-controls="product_table">
                     <h6 class="m-0 font-weight-bold text-primary">Data Table</h6>
 
                 </a>
-               <a href="/up" class="btn btn-light btn-icon-split">
+                <a href="/up" class="btn btn-light btn-icon-split">
                     <span class="icon text-gray-600">
                       <i class="fas fa-arrow-right"></i>
                     </span>
                     <span class="text">Back to State Page</span>
-                  </a>
+                </a>
                 <div class="collapse" id="product_table">
                     <div class="card-body">
                         <div class="table-responsive">
@@ -126,10 +126,11 @@
 
     </div>
 </div>
-    <script>
+<script>
 if ( window.history.replaceState ) {
   window.history.replaceState( null, null, window.location.href );
 }
+
 </script>
 
 {% endblock %}

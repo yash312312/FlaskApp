@@ -11,25 +11,18 @@
 
             <div class="card o-hidden border-0 shadow-lg my-5 text-center">
                 <div class="card-header">
-                    Shops
+                    {{city}}
                 </div>
                 <div class="card-body p-0 mb-4">
-                    <!-- Nested Row within Card Body -->
+
                     <form class="needs-validation justify-content-center" method="POST">
                         <div class="form-row justify-content-center">
-                            <div class="col-md-5 mb-3">
-                                <label for="city">City</label>
-                                <input type="text" class="form-control" id="city" name="city" VALUE="{{city}}"
-                                       readonly>
-                                <div class="invalid-feedback">
-                                    Please provide a valid city.
-                                </div>
-                            </div>
-                            <div class="col-md-5 mb-3">
+                            <div class="col-5 mb-3">
                                 <label for="launch_date">Launch Date</label>
-                                <input type="month" class="form-control" id="launch_date"
+                                <input type="date" class="form-control" id="launch_date"
                                        name="launch_date"
                                        required>
+
                                 <div class="valid-feedback">
                                     Looks good!
                                 </div>
@@ -37,7 +30,12 @@
                                     Please Select a value.
                                 </div>
                             </div>
-
+                            <div class="col-5 mb-3">
+                                <label for="launch_date">End Date</label>
+                                <input type="date" class="form-control" id="end_date"
+                                       name="end_date"
+                                       required>
+                            </div>
                         </div>
                         <div class="form-row justify-content-center">
                             <div class="col-md-3 mb-3">
@@ -111,11 +109,13 @@
 
 
 
+
                     </script>
                     <script>
 if ( window.history.replaceState ) {
   window.history.replaceState( null, null, window.location.href );
 }
+
 
                     </script>
                 </div>

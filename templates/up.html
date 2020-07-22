@@ -9,7 +9,7 @@
             <div class="sidebar-brand-icon rotate-n-15">
                 <i class="fas fa-laugh-wink"></i>
             </div>
-            <div class="sidebar-brand-text mx-3">Quami Consumer Products ></div>
+            <div class="sidebar-brand-text mx-3">Quami Consumer Products</div>
         </a>
 
         <!-- Divider -->
@@ -57,83 +57,43 @@
     <div id="content-wrapper" class="d-flex flex-column">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-xl-8 col-lg-7">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                {% for table in tables %}
-                                {{titles[loop.index]}}
-                                {{ table|safe }}
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-lg-5">
+                <div class="col-5">
+                    <!--                    <div class="card shadow mb-4">-->
+                    <!--                        <a href="#product_table" class="d-block card-header py-3" data-toggle="collapse" role="button"-->
+                    <!--                           aria-controls="product_table">-->
+                    <!--                            <h6 class="m-0 font-weight-bold text-primary">Data Table</h6>-->
 
-                    <div class="card shadow mb-4">
-                        <!-- Card Header - Dropdown -->
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
-                            <div class="dropdown no-arrow">
-                                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                                   data-toggle="dropdown"
-                                   aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                                     aria-labelledby="dropdownMenuLink">
-                                    <div class="dropdown-header">Dropdown Header:</div>
-                                    <a class="dropdown-item" href="#">Action</a>
-                                    <a class="dropdown-item" href="#">Another action</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="#">Something else here</a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Card Body -->
-                        <div class="card-body">
-                            <div class="chart-pie pt-4 pb-2">
-                                <canvas id="myPieChart"></canvas>
-                            </div>
-                            <div class="mt-4 text-center small">
-                    <span class="mr-2">
-                      <i class="fas fa-circle text-primary"></i> Direct
-                    </span>
-                                <span class="mr-2">
-                      <i class="fas fa-circle text-success"></i> Social
-                    </span>
-                                <span class="mr-2">
-                      <i class="fas fa-circle text-info"></i> Referral
-                    </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xl-4 col-lg-5">
-                    <div class="card shadow text-center">
-                        <div class="card-header py-3">
+                    <!--                        </a>-->
+                    <!--                        <div class="collapse" id="product_table">-->
+                    <!--                            <div class="card-body">-->
+                    <!--                                <div class="table-responsive">-->
+                    <!--                                    {% for table in tables %}-->
+                    <!--                                    {{titles[loop.index]}}-->
+                    <!--                                    {{ table|safe }}-->
+                    <!--                                    {% endfor %}-->
+                    <!--                                </div>-->
+                    <!--                            </div>-->
+                    <!--                        </div>-->
+                    <!--                    </div>-->
+<!--                    Revenue of Product Start-->
+                    <div class="card shadow">
+                        <div class="card-header">
                             <h6 class="m-0 font-weight-bold text-primary">Revenue of Product</h6>
                         </div>
                         <form class="needs-validation justify-content-center" method="POST">
-                            <div class="form-row justify-content-center">
+                            <div class="form-row justify-content-center ml-2 mr-2">
                                 <div class="col-6 mb-3">
-                                    <label for="start_date">Start Date</label>
-                                    <input type="month" class="form-control" id="start_date"
-                                           name="start_date" value="{{ssd if ssd}}" required>
+                                    <label for="rps">Start Date</label>
+                                    <input type="month" class="form-control" id="rps"
+                                           name="rps" value="{{rps}}" required>
                                 </div>
                                 <div class="col-6 mb-3">
-                                    <label for="end_date">End Date</label>
-                                    <input type="month" class="form-control" id="end_date"
-                                           name="end_date" value="{{sed if sed}}" required>
+                                    <label for="rpe">End Date</label>
+                                    <input type="month" class="form-control" id="rpe"
+                                           name="rpe" value="{{rpe}}" required>
                                 </div>
                             </div>
-                            <div class="form-row justify-content-center">
+                            <div class="form-row justify-content-center ml-2 mr-2">
                                 <div class="col-6 mb-3">
                                     <label for="product_name">Product Name</label>
                                     <select class="form-control" id="product_revenue" name="product_revenue">
@@ -143,18 +103,155 @@
                                         <option value="{{set_product}}" SELECTED>{{set_product}}</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 my-auto">
-                                    <button class="btn btn-primary" type="submit" name="btn" value="revenue_product"
+                                <div class="col-6 mt-4 p-2">
+                                    <button class="btn btn-primary" type="submit" name="btn" value="product_revenue"
                                             id="click">
                                         Show
                                     </button>
                                 </div>
                             </div>
-                            <div class=" my-auto">
-                                Total Revenue = {{revenue}}
+                            <div class=" my-auto text-center">
+                                Total Revenue = {{product_revenue}}
                             </div>
                         </form>
                     </div>
+<!--                    Revenue of Product End-->
+                    <div class="card shadow mt-1">
+                        <div class="card-header">
+                            <div class="row">
+                                <h6 class="font-weight-bold text-primary">Product Wise Distribution of Revenue</h6>
+
+                            </div>
+                        </div>
+                        <!-- Card Body -->
+                        <div class="card-body">
+                            <div class="row">
+                                <form class="needs-validation" method="POST">
+                                    <div class="form-row justify-content-center">
+                                        <div class="col-5 ">
+                                            <label for="start_date_p">Start Date</label>
+                                            <input type="month" class="form-control" id="start_date_p"
+                                                   name="start_date_p" value="{{psd if psd}}" required>
+                                        </div>
+                                        <div class="col-5 ">
+                                            <label for="end_date_p">End Date</label>
+                                            <input type="month" class="form-control" id="end_date_p"
+                                                   name="end_date_p" value="{{ped if ped}}" required>
+                                        </div>
+
+                                        <div class="form-row justify-content-center">
+                                            <div class="col-2 mt-3 pt-3">
+                                                <button class="btn btn-primary" type="submit" name="btn"
+                                                        value="revenue_product_p">
+                                                    Show
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="chart-pie pt-4 pb-2">
+                                <canvas id="productPieChart"></canvas>
+                            </div>
+                            <div class="mt-4 text-center small">
+                                {% for i, j in data_state %}
+                                <span class="mr-2">
+                                  <i class="fas fa-circle " style="color:{{ j }}"></i> {{ i }}
+                                </span>
+                                {% endfor %}
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">Revenue of City</h6>
+                        </div>
+                        <form class="needs-validation justify-content-center" method="POST">
+                            <div class="form-row justify-content-center ml-2 mr-2">
+                                <div class="col-6 mb-3">
+                                    <label for="start_date_rc">Start Date</label>
+                                    <input type="month" class="form-control" id="start_date_rc"
+                                           name="start_date_rc" value="{{ssd if ssd}}" required>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label for="end_date_rc">End Date</label>
+                                    <input type="month" class="form-control" id="end_date_rc"
+                                           name="end_date_rc" value="{{sed if sed}}" required>
+                                </div>
+                            </div>
+                            <div class="form-row justify-content-center ml-2 mr-2">
+                                <div class="col-6 mb-3">
+                                    <label for="city_revenue">City Name</label>
+                                    <select class="form-control" id="city_revenue" name="city_revenue">
+                                        {% for city in listOfCity %}
+                                        <option value="{{city}}" SELECTED>{{city}}</option>
+                                        {% endfor %}
+                                        <option value="{{set_city}}" SELECTED>{{set_city}}</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 mt-4 p-2">
+                                    <button class="btn btn-primary" type="submit" name="btn" value="revenue_city">
+                                        Show
+                                    </button>
+                                </div>
+                            </div>
+                            <div class=" my-auto text-center">
+                                Total Revenue = {{city_revenue}}
+                            </div>
+                        </form>
+                    </div>
+                    <!--City Wise Distribution of Revenue Begin -->
+                    <div class="card shadow mt-1">
+
+                        <div class="card-header">
+                            <div class="row">
+                                <h6 class="font-weight-bold text-primary"> City Wise Distribution of Revenue</h6>
+                            </div>
+                        </div>
+                        <!-- Card Body -->
+                        <div class="card-body">
+                            <div class="row">
+                                <form class="needs-validation justify-content-center " method="POST">
+                                    <div class="form-row justify-content-center">
+                                        <div class="col-4">
+                                            <label for="start_date_c">Start Date</label>
+                                            <input type="month" class="form-control" id="start_date_c"
+                                                   name="start_date_c" value="{{csd if csd}}" required>
+                                        </div>
+                                        <div class="col-4">
+                                            <label for="end_date_c">End Date</label>
+                                            <input type="month" class="form-control" id="end_date_c"
+                                                   name="end_date_c" value="{{ced if ced}}" required>
+                                        </div>
+
+                                        <div class="form-row justify-content-center">
+                                            <div class="col-4 mt-3 pt-3">
+                                                <button class="btn btn-primary" type="submit" name="btn"
+                                                        value="revenue_product_c">
+                                                    Show
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="chart-pie pt-4 pb-2">
+                                <canvas id="cityPieChart"></canvas>
+                            </div>
+                            <div class="mt-4 text-center small">
+                                {% for i, j in data_city %}
+                                <span class="mr-2">
+                                  <i class="fas fa-circle " style="color:{{ j }}"></i> {{ i }}
+                                </span>
+                                {% endfor %}
+
+                            </div>
+                        </div>
+                    </div>
+                    <!--City Wise Distribution of Revenue End -->
                 </div>
             </div>
         </div>
@@ -164,6 +261,88 @@
 if ( window.history.replaceState ) {
   window.history.replaceState( null, null, window.location.href );
 }
+
+
+
+
+
+
+
+</script>
+<script src="{{url_for('static',filename='vendor/chart.js/Chart.min.js')}}"></script>
+<script>
+    // Set new default font family and font color to mimic Bootstrap's default styling
+Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+Chart.defaults.global.defaultFontColor = '#858796';
+
+// Pie Chart Example
+var ctx = document.getElementById("productPieChart");
+var productPieChart = new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: {{lp|safe}},
+    datasets: [{
+      data: {{list_revenue_product|safe}},
+      backgroundColor: {{colors_state|safe}},
+      hoverBackgroundColor: [],
+      hoverBorderColor: "rgba(234, 236, 244, 1)",
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    tooltips: {
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 10,
+      yPadding: 10,
+      displayColors: false,
+      caretPadding: 10,
+    },
+    legend: {
+      display: false
+    },
+    cutoutPercentage: 80,
+  },
+});
+var ctd = document.getElementById("cityPieChart");
+var productPieChart = new Chart(ctd, {
+  type: 'doughnut',
+  data: {
+    labels: {{list_city|safe}},
+    datasets: [{
+      data: {{list_revenue_city|safe}},
+      backgroundColor: {{colors_city|safe}},
+      hoverBackgroundColor: [],
+      hoverBorderColor: "rgba(234, 236, 244, 1)",
+    }],
+  },
+  options: {
+    maintainAspectRatio: false,
+    tooltips: {
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 5,
+      yPadding: 5,
+      displayColors: false,
+      caretPadding: 10,
+    },
+    legend: {
+      display: false
+    },
+    cutoutPercentage: 80,
+  },
+});
+
+
+
+
+
+
+
 </script>
 <!--<script src="{{url_for('static',filename='js/demo/chart-pie-demo.js')}}"></script>-->
 

@@ -17,7 +17,7 @@
                     <!-- Nested Row within Card Body -->
                     <form class="needs-validation justify-content-center" method="POST">
                         <div class="form-row justify-content-center">
-                            <div class="col-md-0 mb-3">
+                            <div class="col-md-5 mb-3">
                                 <label for="city">City</label>
                                 <input type="text" class="form-control" id="city" name="city" value="{{city}}"
                                        required readonly>
@@ -26,8 +26,6 @@
                                 </div>
                             </div>
 
-                        </div>
-                        <div class="form-row justify-content-center">
                             <div class="col-md-5 mb-3">
                                 <label for="product_name">Product Name</label>
                                 <select class="form-control" id="product_name" name="product_name">
@@ -35,7 +33,10 @@
                                     <option value="{{product}}" SELECTED>{{product}}</option>
                                     {% endfor %}
                                 </select>
+
                             </div>
+                        </div>
+                        <div class="form-row justify-content-center">
                             <div class="col-md-5 mb-3">
                                 <label for="launch_date">Launch Date</label>
                                 <input type="month" class="form-control" id="launch_date"
@@ -48,8 +49,20 @@
                                     Please Select a value.
                                 </div>
                             </div>
-
+                            <div class="col-md-5 mb-3">
+                                <label for="launch_date">End Date</label>
+                                <input type="month" class="form-control" id="end_date"
+                                       name="end_date"
+                                       required>
+                                <div class="valid-feedback">
+                                    Looks good!
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please Select a value.
+                                </div>
+                            </div>
                         </div>
+
                         <div class="form-row justify-content-center">
                             <div class="col-md-3 mb-3">
                                 <label for="initial_units">Initial Number of Units</label>
@@ -99,31 +112,7 @@
                         <button class="btn btn-primary" type="submit" name="btn" value="add1">Add</button>
                     </form>
                     <button class="btn btn-primary">{{city}}</button>
-                    <script>
-                    // Example starter JavaScript for disabling form submissions if there are invalid fields
-                    (function() {
-                      'use strict';
-                      window.addEventListener('load', function() {
-                        // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                        var forms = document.getElementsByClassName('needs-validation');
-                        // Loop over them and prevent submission
-                        var validation = Array.prototype.filter.call(forms, function(form) {
-                          form.addEventListener('submit', function(event) {
-                            if (form.checkValidity() === false) {
-                              event.preventDefault();
-                              event.stopPropagation();
-                            }
-                            form.classList.add('was-validated');
-                          }, false);
-                        });
-                      }, false);
-                    })();
 
-
-
-
-
-                    </script>
                 </div>
             </div>
         </div>
@@ -133,6 +122,10 @@
 if ( window.history.replaceState ) {
   window.history.replaceState( null, null, window.location.href );
 }
+
+
+
+
 
 </script>
 

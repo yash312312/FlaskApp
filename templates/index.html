@@ -1,35 +1,82 @@
 {% extends "layout.html" %}
 {% block body %}
-<body>
-<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<div id="wrapper">
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-    <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
-        <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-laugh-wink"></i>
-        </div>
-        <div class="sidebar-brand-text mx-3">Quami Consumer Products ></div>
-    </a>
+        <!-- Sidebar - Brand -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+            <div class="sidebar-brand-icon rotate-n-15">
+                <i class="fas fa-laugh-wink"></i>
+            </div>
+            <div class="sidebar-brand-text mx-3">Quami Consumer Products</div>
+        </a>
 
-    <!-- Divider -->
-    <hr class="sidebar-divider my-0">
-    <div class="btn-group">
-        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-            Choose State
-        </button>
-        <div class="dropdown-menu">
-            <a class="dropdown-item" href="/up">UP</a>
-            <a class="dropdown-item" href="/bihar">Bihar</a>
-            <a class="dropdown-item" href="/delhi">Delhi NCR</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Separated link</a>
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0">
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false">
+                Choose State
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="/up">UP</a>
+                <a class="dropdown-item" href="/bihar">Bihar</a>
+                <a class="dropdown-item" href="/delhi">Delhi NCR</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#">Separated link</a>
+            </div>
         </div>
+
+        <!-- Sidebar Toggler (Sidebar) -->
+        <hr class="sidebar-divider my-0">
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false">
+                Choose City
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="/lucknow">Lucknow</a>
+                <a class="dropdown-item" href="/gorakhpur">Gorakhpur</a>
+                <a class="dropdown-item" href="/patna">Patna</a>
+            </div>
+        </div>
+        <hr class="sidebar-divider my-0">
+    </ul>
+    <div class="container">
+        <div class="row">
+            <div class="card shadow col-6">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Input</h6>
+                </div>
+                <div class="card-body">
+                    <form style="text-align: center;" method="POST" class="row">
+                        <div class="form-group col-6">
+                            <label for="state_list">Choose State</label>
+                            <select class="form-control mb-3" id="state_list" name="state_list">
+                                <option value="up">UP</option>
+                                <option value="bihar">Bihar</option>
+                                <option value="delhi">Delhi NCR</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary" name="btn" value="chosen_state">Choose
+                            </button>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="city_list">Choose City</label>
+                            <select class="form-control mb-3" id="city_list" name="city_list">
+                                <option value="lucknow">Lucknow</option>
+                                <option value="gorakhpur">Gorakhpur</option>
+                                <option value="patna">Patna</option>
+                                <option value="noida">Noida</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary" name="btn" value="chosen_city">Choose</button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
     </div>
-
-    <!-- Sidebar Toggler (Sidebar) -->
-    <hr class="sidebar-divider my-0">
-
-</ul>
-
+</div>
 {% endblock %}

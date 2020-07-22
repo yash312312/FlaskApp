@@ -1,40 +1,59 @@
-from app import app, pd, db, render_template, request, fin, cursor, connection, redirect, url_for, np, session
+import os
+
+from flask import send_file
+from werkzeug.utils import secure_filename
+
+from FlaskApp import app, pd, db, render_template, request, fin, cursor, connection, redirect, url_for, np, session, \
+    colors
 
 app.secret_key = "hello"
+app.config['UPLOAD_FOLDER'] = "C:\\Users\\admin\\OneDrive\\Desktop\\FlaskApp\\FlaskApp\\static"
 
 
-def add_product(n, d, sd, q, iu, gr, mu):
-    if n != 'Shops':
-        name = "Units of " + n + "/Shops"
-    else:
-        name = n
-    date = pd.Timestamp(d)
-    iu = int(iu)
-    gr = int(gr)
-    mu = int(mu)
-    c = pd.date_range(sd, end='2024-12-31', freq='MS')
+def save_excel(city_t, filename):
+    xlsFilepath = app.config['UPLOAD_FOLDER'] + '\\%s_data.xlsx' % filename
+    writer = pd.ExcelWriter(xlsFilepath, engine='xlsxwriter')
+    city_t.to_excel(writer, sheet_name='Sheet1', na_rep=0)
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+
+    # Iterate through each column and set the width == the max length in that column. A padding length of 2 is also added.
+    for i, col in enumerate(city_t.columns):
+        # find length of column i
+        column_len = city_t[col].astype(str).str.len().max()
+        # Setting the length if the column header is larger
+        # than the max column value length
+        column_len = max(column_len, len(col)) + 2
+        # set the column length
+        worksheet.set_column(i, i, column_len)
+    writer.save()
+
+
+def add_product(name, sd, ed, initial, trend, mx, q):
+    c = pd.date_range(sd, ed, freq='MS').strftime("%d/%m/%Y")
+    sd = pd.Timestamp(sd).strftime("%d/%m/%Y")
+    c = c.insert(0, 'Maximum')
+    c = c.insert(0, 'Growth Rate')
     c = c.insert(0, 'Shops and Units')
     new_df = pd.DataFrame(columns=c)
     new_df.set_index('Shops and Units', inplace=True)
-    new_df.loc[name, date] = iu
-    k = date + pd.DateOffset(months=1)
-    if q == 'on':
-        period = 1
-        while (k <= fin):
-            if (period % 3 == 0):
-                new_df.loc[name, k] = min(new_df.loc[name, date] + gr, mu)
-            else:
-                new_df.loc[name, k] = min(new_df.loc[name, date], mu)
-            date = k
-            period = period + 1
-            k = date + pd.DateOffset(months=1)
-    else:
-        while (k <= fin):
-            new_df.loc[name, k] = min(new_df.loc[name, date] + gr, mu)
-            date = k
-            k = date + pd.DateOffset(months=1)
-    print(new_df)
+    new_df.loc[name, sd] = initial
+    new_df.loc[name, 'Maximum'] = str(mx)
+    new_df.loc[name, 'Growth Rate'] = str(trend)
+    for k in range(4, len(c)):
+        new_df.loc[name, c[k]] = new_df.loc[name, c[k - 1]] + trend
     return new_df
+
+
+def update_data(city_data):
+    c = city_data.columns
+    for k in city_data.index:
+        mx = city_data.loc[k, 'Maximum']
+        trend = city_data.loc[k, 'Growth Rate']
+        for j in range(3, len(c)):
+            city_data.loc[k, c[j]] = int(city_data.loc[k, c[j - 1]]) + int(trend)
+    print(city_data)
+    return city_data
 
 
 def delete_product(city, product_to_delete):
@@ -50,7 +69,9 @@ def table_exists(name):
     return ret
 
 
-def total_revenue(city_t, state):
+def total_revenue(city, state):
+    city_t = pd.read_sql_table('%s_data' % city, con=db)
+    state = pd.read_sql_table('%s_data' % state, con=db)
     city_t.set_index('Shops and Units', inplace=True)
     city_t.replace(to_replace=[None], value='0', inplace=True)
     city_t.replace(to_replace=np.nan, value='0', inplace=True)
@@ -99,9 +120,8 @@ def date_check(i_d, f_d):
     return True
 
 
-def calc_state_revenue(state, l, name):
-    d1 = session['ssd']
-    d2 = session['sed'] + '-01'
+def calc_state_revenue(state, l, name, d1, d2):
+    d2 = d2 + '-01'
     state_cost = pd.read_sql("SELECT * FROM `%s_data` WHERE `name` = '%s'" % (state, name), db, columns=['cost'],
                              index_col='name').loc[name, 'cost']
     sum = 0
@@ -127,65 +147,116 @@ def calc_state_revenue(state, l, name):
     return sum
 
 
-@app.route("/")
+def calc_city_wise_revenue(city, d1, d2, state):
+    d2 = d2 + '-01'
+    if not table_exists("%s_data" % city):
+        return 0
+    city_t = total_revenue(city, state)
+    return calc_revenue(city_t, d1, d2)
+
+
+@app.route("/", methods=['GET', 'POST'])
 def home():
+    if request.method == 'POST':
+        if request.form['btn'] == 'chosen_city':
+            session['city_name'] = request.form.get('city_list')
+            return redirect(url_for('city_input_route'))
     return render_template('index.html')
+
+
+@app.route("/product", methods=['GET', 'POST'])
+def product_cost():
+    return render_template('product_cost.html')
+
+
+@app.route("/city_input", methods=['GET', 'POST'])
+def city_input_route():
+    if 'city_name' in session:
+        city_data = None
+        city = session['city_name']
+        if table_exists('%s_data' % city):
+            city_data = pd.read_sql_table('%s_data' % city, con=db)
+            city_data.replace(to_replace=[None], value='0', inplace=True)
+            city_data.replace(to_replace=np.nan, value='0', inplace=True)
+        else:
+            session['city'] = city
+            return redirect(url_for('form_shop'))
+        # print(city_data)
+        if request.method == 'POST':
+            if request.form['btn'] == 'upload':
+                f = request.files['city_data']
+                f.save(os.path.join(app.config['UPLOAD_FOLDER'], '%s_data' % city))
+                city_data = pd.read_excel(os.path.join(app.config['UPLOAD_FOLDER'], '%s_data' % city))
+                city_data.set_index('Shops and Units', inplace=True)
+                city_data = update_data(city_data)
+
+                city_data.to_sql(name='%s_data' % city, con=db, if_exists='replace', index_label='Shops and Units')
+                city_data.reset_index(inplace=True)
+
+        return render_template('city_input.html', tables=[
+            city_data.to_html(classes='table table-bordered', col_space=150, index=False, table_id='product_table',
+                              justify='center')], titles=city_data.columns.values, city=city.upper())
+    else:
+        return redirect(url_for('home'))
+
+
+@app.route('/download')
+def download_file():
+    p = app.config['UPLOAD_FOLDER'] + "\\" + session['city_name'] + '_data.xlsx'
+    return send_file(p, as_attachment=True)
+
+
+@app.route("/state_input", methods=['GET', 'POST'])
+def state_input_route():
+    if 'state_name' in session:
+        state = session['state_name']
+        if not table_exists('%s_data' % state):
+            cursor.execute(
+                "CREATE TABLE %s_data (name VARCHAR(255) , cost DOUBLE)" % state)
+            connection.commit()
+        temp = pd.read_sql_table('%s_data' % state, con=db)
+        if request.method == 'POST':
+            product_name = request.form.get('product_name')
+            product_cost = request.form.get('product_cost')
+
+            if product_name and product_cost and product_name not in list(temp['name']):
+                error = 'Invalid Values'
+                cursor.execute('''INSERT into %s_data (name, cost)
+                                             values ('%s', %s)''' %
+                               (state, product_name, product_cost))
+                connection.commit()
+            print('''INSERT into %s_data (name, cost) values ('%s', %s)''' % (state, product_name, product_cost))
+            temp = pd.read_sql_table('%s_data' % state, con=db)
+        return render_template('state_input.html', tables=[
+            temp.to_html(classes='table table-bordered', col_space=150, index=False, table_id='product_table',
+                         justify='center')], titles=temp.columns.values, state=state.upper())
+    else:
+        return redirect(url_for('home'))
 
 
 @app.route("/up", methods=['GET', 'POST'])
 def up_route():
-    if not table_exists('up_data'):
+    if not table_exists('up_revenue'):
         cursor.execute(
-            "CREATE TABLE up_data (name VARCHAR(255) , cost DOUBLE)")
+            "CREATE TABLE up_revenue (parameter VARCHAR(255) , value VARCHAR(255))")
         connection.commit()
-    temp = pd.read_sql_table('up_data', con=db)
-    revenue = 0
-    if 'ssd' in session:
-        session.pop('ssd', None)
-    if 'sed' in session:
-        session.pop('sed', None)
+        cursor.execute('''INSERT into up_revenue (parameter, value) values ('rps', NULL)''')
+        cursor.execute('''INSERT into up_revenue (parameter, value) values ('rpe', NULL)''')
+        cursor.execute('''INSERT into up_revenue (parameter, value) values ('rcs', NULL)''')
+        cursor.execute('''INSERT into up_revenue (parameter, value) values ('rce', NULL)''')
+        cursor.execute('''INSERT into up_revenue (parameter, value) values ('pwds', NULL)''')
+        cursor.execute('''INSERT into up_revenue (parameter, value) values ('pwse', NULL)''')
+        cursor.execute('''INSERT into up_revenue (parameter, value) values ('cwds', NULL)''')
+        cursor.execute('''INSERT into up_revenue (parameter, value) values ('cwde', NULL)''')
+        connection.commit()
+    up_revenue = pd.read_sql_table('up_revenue', con=db)
+    up_revenue.set_index('paramater', inplace=True)
     if request.method == 'POST':
-        if request.form['btn'] == 'add':
-            product_name = request.form.get('product_name')
-            product_cost = request.form.get('product_cost')
-            if not product_name or not product_cost or product_name in str(temp['name']):
-                error = 'Invalid Values'
-                return render_template('up.html', tables=[
-                    temp.to_html(classes='table table-bordered', col_space=150, index=False, table_id='dataTable',
-                                 justify='center')], titles=temp.columns.values, listOfPro=(temp['name']),
-                                       revenue=revenue,
-                                       ssd=session['ssd'] if 'ssd' in session else None,
-                                       sed=session['sed'] if 'sed' in session else None,
-                                       set_product=session['set_p'] if 'set_p' in session else None)
+        if request.form['btn'] == 'product_revenue':
+            up_revenue.loc['rps', 'value'] = request.form.get('rps')
+            up_revenue.loc['rpe', 'value'] = request.form.get('rpe')
 
-            cursor.execute('''INSERT into up_data (name, cost)
-                             values (%s, %s)''',
-                           (product_name, product_cost))
-            connection.commit()
-        elif request.form['btn'] == 'revenue_product':
-            if 'ssd' in session:
-                session.pop('ssd', None)
-            if 'sed' in session:
-                session.pop('sed', None)
-            if 'set_p' in session:
-                session.pop('set_p', None)
-            session['set_p'] = request.form.get('product_revenue')
-            session['ssd'] = request.form.get('start_date')
-            session['sed'] = request.form.get('end_date')
-            if pd.Timestamp(session['ssd']) > pd.Timestamp(session['sed']):
-                revenue = 'Illegal Date'
-            else:
-                l = ['lucknow', 'gorakhpur']
-                revenue = calc_state_revenue('up', l, session['set_p'])
-                print(revenue)
-    temp = pd.read_sql_table('up_data', con=db)
-    return render_template('up.html', tables=[
-        temp.to_html(classes='table table-bordered', col_space=150, index=False, table_id='dataTable',
-                     justify='center')], titles=temp.columns.values, listOfPro=(temp['name']), revenue=revenue,
-                           ssd=session['ssd'] if 'ssd' in session else None,
-                           sed=session['sed'] if 'sed' in session else None,
-                           set_product=session['set_p'] if 'set_p' in session else None
-                           )
+    return render_template('up.html')
 
 
 @app.route("/bihar", methods=['GET', 'POST'])
@@ -194,30 +265,27 @@ def bihar_route():
         cursor.execute(
             "CREATE TABLE bihar_data (name VARCHAR(255) , cost DOUBLE)")
         connection.commit()
+    if request.method == 'GET':
+        session.clear()
+    list_city = ['patna']
     temp = pd.read_sql_table('bihar_data', con=db)
-    revenue = 0
-    if 'ssd' in session:
-        session.pop('ssd', None)
-    if 'sed' in session:
-        session.pop('sed', None)
+    session['lp'] = list(temp['name'])
+
     if request.method == 'POST':
         if request.form['btn'] == 'add':
             product_name = request.form.get('product_name')
             product_cost = request.form.get('product_cost')
             if not product_name or not product_cost or product_name in str(temp['name']):
                 error = 'Invalid Values'
-                return render_template('bihar.html', tables=[
-                    temp.to_html(classes='table table-bordered', col_space=150, index=False, table_id='dataTable',
-                                 justify='center')], titles=temp.columns.values, listOfPro=(temp['name']),
-                                       revenue=revenue,
-                                       ssd=session['ssd'] if 'ssd' in session else None,
-                                       sed=session['sed'] if 'sed' in session else None,
-                                       set_product=session['set_p'] if 'set_p' in session else None)
-
-            cursor.execute('''INSERT into bihar_data (name, cost)
-                             values (%s, %s)''',
-                           (product_name, product_cost))
-            connection.commit()
+                product_name = request.form.get('product_name')
+                product_cost = request.form.get('product_cost')
+                if product_name and product_cost and product_name not in session['lp']:
+                    error = 'Invalid Values'
+                    cursor.execute('''INSERT into up_data (name, cost)
+                                                 values (%s, %s)''',
+                                   (product_name, product_cost))
+                    connection.commit()
+                    session['lp'].append(product_name)
         elif request.form['btn'] == 'revenue_product':
             if 'ssd' in session:
                 session.pop('ssd', None)
@@ -229,19 +297,57 @@ def bihar_route():
             session['ssd'] = request.form.get('start_date')
             session['sed'] = request.form.get('end_date')
             if pd.Timestamp(session['ssd']) > pd.Timestamp(session['sed']):
-                revenue = 'Illegal Date'
+                session['revenue'] = 'Illegal Date'
             else:
-                l = ['patna']
-                revenue = calc_state_revenue('bihar', l, session['set_p'])
-                print(revenue)
+
+                session['revenue'] = calc_state_revenue('bihar', list_city, session['set_p'], session['ssd'],
+                                                        session['sed'])
+                print(session['revenue'])
+        elif request.form['btn'] == 'revenue_product_p':
+            if 'psd' in session:
+                session.pop('psd', None)
+            if 'ped' in session:
+                session.pop('ped', None)
+            temp = pd.read_sql_table('bihar_data', con=db)
+            session['lp'] = list(temp['name'])
+            print(session['lp'])
+            session['psd'] = request.form.get('start_date_p')
+            session['ped'] = request.form.get('end_date_p')
+            session['list_revenue'] = [calc_state_revenue('bihar', list_city, i, session['psd'], session['ped']) for i
+                                       in
+                                       session['lp']]
+            print(session['list_revenue'])
+        elif request.form['btn'] == 'revenue_product_c':
+            if 'csd' in session:
+                session.pop('csd', None)
+            if 'ced' in session:
+                session.pop('ced', None)
+
+            session['csd'] = request.form.get('start_date_c')
+            session['ced'] = request.form.get('end_date_c')
+            session['city_wise_revenue'] = [calc_city_wise_revenue(c, session['csd'], session['ced'], 'bihar') for c in
+                                            list_city]
+            print(session['city_wise_revenue'])
+
     temp = pd.read_sql_table('bihar_data', con=db)
     return render_template('bihar.html', tables=[
         temp.to_html(classes='table table-bordered', col_space=150, index=False, table_id='dataTable',
-                     justify='center')], titles=temp.columns.values, listOfPro=(temp['name']), revenue=revenue,
+                     justify='center')], titles=temp.columns.values, listOfPro=(temp['name']),
+                           revenue=session['revenue'] if 'revenue' in session else 0,
                            ssd=session['ssd'] if 'ssd' in session else None,
                            sed=session['sed'] if 'sed' in session else None,
-                           set_product=session['set_p'] if 'set_p' in session else None
-                           )
+                           psd=session['psd'] if 'psd' in session else None,
+                           ped=session['ped'] if 'ped' in session else None,
+                           csd=session['csd'] if 'csd' in session else None,
+                           ced=session['ced'] if 'ced' in session else None,
+                           set_product=session['set_p'] if 'set_p' in session else None,
+                           lp=session['lp'] if 'lp' in session else [],
+                           list_revenue_city=session['city_wise_revenue'] if 'city_wise_revenue' in session else [],
+                           list_city=list_city,
+                           list_revenue_product=session['list_revenue'] if 'list_revenue' in session else [],
+                           colors_state=colors, colors_city=colors[::-1],
+                           data_state=zip(session['lp'], colors[:len(session['lp'])]),
+                           data_city=zip(list_city, colors[::-1]))
 
 
 @app.route("/delhi")
@@ -269,11 +375,13 @@ def lucknow_route():
             product_to_delete = request.form.get('delete_product')
             delete_product('lucknow', product_to_delete)
     city_t = pd.read_sql_table('lucknow_data', con=db)
+    city_t.replace(to_replace=[None], value='0', inplace=True)
+    city_t.replace(to_replace=np.nan, value='0', inplace=True)
     state_t = pd.read_sql_table('up_data', con=db)
     product_in_city = set(z[9:-6] for z in city_t['Shops and Units'][1:])
     revenue = 0
-    city_t2 = total_revenue(city_t, state_t)
-    city_t.reset_index(inplace=True)
+    city_t2 = total_revenue('lucknow', 'up')
+
     if request.method == 'POST':
         if request.form['btn'] == 'revenue':
             if 'sd' in session:
@@ -318,11 +426,14 @@ def gorakhpur_route():
             product_to_delete = request.form.get('delete_product')
             delete_product('gorakhpur', product_to_delete)
     city_t = pd.read_sql_table('gorakhpur_data', con=db)
+    city_t.replace(to_replace=[None], value='0', inplace=True)
+    city_t.replace(to_replace=np.nan, value='0', inplace=True)
+
     state_t = pd.read_sql_table('up_data', con=db)
     product_in_city = set(z[9:-6] for z in city_t['Shops and Units'][1:])
     revenue = 0
-    city_t2 = total_revenue(city_t, state_t)
-    city_t.reset_index(inplace=True)
+    city_t2 = total_revenue('gorakhpur', 'up')
+
     if request.method == 'POST':
         if request.form['btn'] == 'revenue':
             if 'sd' in session:
@@ -352,12 +463,12 @@ def patna_route():
     if not table_exists('patna_data'):
         session['city'] = 'patna'
         return redirect(url_for('form_shop'))
+    if 'sd' in session:
+        session.pop('sd', None)
+    if 'ed' in session:
+        session.pop('ed', None)
     if request.method == 'POST':
         if request.form['btn'] == 'add':
-            if 'city' in session:
-                session.pop('city', None)
-            if 'state' in session:
-                session.pop('state', None)
             session['city'] = 'patna'
             session['state'] = 'bihar'
             city_t = pd.read_sql_table('patna_data', con=db)
@@ -367,13 +478,19 @@ def patna_route():
             product_to_delete = request.form.get('delete_product')
             delete_product('patna', product_to_delete)
     city_t = pd.read_sql_table('patna_data', con=db)
+    city_t.replace(to_replace=[None], value='0', inplace=True)
+    city_t.replace(to_replace=np.nan, value='0', inplace=True)
     state_t = pd.read_sql_table('bihar_data', con=db)
     product_in_city = set(z[9:-6] for z in city_t['Shops and Units'][1:])
     revenue = 0
-    city_t2 = total_revenue(city_t, state_t)
-    city_t.reset_index(inplace=True)
+    city_t2 = total_revenue('patna', 'bihar')
+
     if request.method == 'POST':
         if request.form['btn'] == 'revenue':
+            if 'sd' in session:
+                session.pop('sd', None)
+            if 'ed' in session:
+                session.pop('ed', None)
             d1 = request.form.get('start_date')
             d2 = request.form.get('end_date')
             session['sd'] = d1
@@ -396,47 +513,39 @@ def patna_route():
 def form_shop():
     if 'city' in session:
         if (request.method == 'POST'):
-            date = request.form.get('launch_date') + "-01"
-            i_s = request.form.get('initial_shops')
-            gr = request.form.get('growth_rate')
-            ms = request.form.get('max_shop')
+            sdate = request.form.get('launch_date')
+            edate = request.form.get('end_date')
+            initial = request.form.get('initial_shops')
+            growth = request.form.get('growth_rate')
+            max_shop = request.form.get('max_shop')
             q = request.form.get('quarterly')
-            column_names = pd.date_range(date, end='2024-12-31', freq='MS').strftime("%m/%d/%Y")
-            column_names = column_names.insert(0, 'Shops and Units')
-            for i in column_names:
-                if i == column_names[0]:
-                    cursor.execute("CREATE TABLE %s_data(`%s` VARCHAR(255))" % (session['city'], i))
-                    connection.commit()
-                else:
-                    cursor.execute("ALTER TABLE %s_data ADD COLUMN `%s` float" % (session['city'], i))
-                    connection.commit()
-            new_df = add_product('Shops', date, date, q, i_s, gr, ms)
-            new_df.columns = column_names[1:]
+            new_df = add_product('Shops', sdate, edate, int(initial), int(growth), int(max_shop), q)
+            save_excel(new_df, session['city'])
             new_df.to_sql(con=db, name='%s_data' % session['city'], if_exists='append', index_label='Shops and Units')
-            return redirect(url_for("%s_route" % session['city']))
+            return redirect(url_for('city_input_route'))
+    else:
+        return redirect(url_for('home'))
 
-    return render_template('form_shop.html', city=session['city'].capitalize())
+    return render_template('form_shop.html')
 
 
 @app.route("/unit", methods=['POST', 'GET'])
 def form_product():
-    if (request.method == 'POST'):
-        city = request.form.get('city')
-        name = request.form.get('product_name')
-        date = request.form.get('launch_date')
-        iu = request.form.get('initial_units')
-        gr = request.form.get('growth_rate')
-        mu = request.form.get('max_units')
-        q = request.form.get('quarterly')
-        new_df = add_product(name, date, session['date'], q, iu, gr, mu)
-        print(new_df)
-        c = pd.date_range(session['date'], end='2024-12-31', freq='MS').strftime("%m/%d/%Y")
-        new_df.columns = c
-        new_df.to_sql(con=db, name='%s_data' % session['city'], if_exists='append', index_label='Shops and Units')
-        return redirect(url_for("%s_route" % session['city']))
-    city_t = pd.read_sql_table('%s_data' % session['city'], con=db)
-    product_in_city = set(z[9:-6] for z in city_t['Shops and Units'][1:])
-    state_t = pd.read_sql_table('%s_data' % session['state'], con=db)
-    product_in_state = set(state_t['name'])
-    list_of_pro_to_be_added = product_in_state - product_in_city
-    return render_template('form_product.html', listOfPro=list_of_pro_to_be_added, city=session['city'].capitalize())
+    if 'city_name' in session:
+        if (request.method == 'POST'):
+            sdate = request.form.get('launch_date')
+            edate = request.form.get('end_date')
+            initial = request.form.get('initial_units')
+            growth = request.form.get('growth_rate')
+            max_unit = request.form.get('max_units')
+            q = request.form.get('quarterly')
+            name = request.form.get('product_name')
+            new_df = add_product(name, sdate, edate, int(initial), int(growth), int(max_unit), q)
+            new_df.to_sql(con=db, name='%s_data' % session['city_name'], if_exists='append',
+                          index_label='Shops and Units')
+            temp = pd.read_sql_table('%s_data' % session['city_name'], con=db)
+            temp.set_index('Shops and Units', inplace=True)
+            save_excel(temp, session['city_name'])
+            return redirect(url_for('city_input_route'))
+        return render_template('form_product.html', listOfPro=['X', 'Y', 'Z'])
+    return redirect(url_for('home'))
