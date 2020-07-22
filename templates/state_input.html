@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block body %}
+<body class="bg-gradient-primary">
+
+
+<!-- Outer Row -->
+<div class="container">
+    <div class="row">
+        <div class="card shadow col-6 mt-3">
+            <div class="d-block card-header py-3">
+                <div class="row">
+                    <h6 class="font-weight-bold text-primary">Data Table of <span
+                            class="p-1 ml-2 bg-success text-white rounded">{{state}}</span>
+                        <a href="/"
+                           class="p-1 ml-5 btn btn-success">
+                            <span class="text font-weight-bold">Back to Home Page</span>
+                        </a>
+                    </h6>
+
+                </div>
+            </div>
+            <div id="product_table">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        {% for table in tables %}
+                        {{titles[loop.index]}}
+                        {{ table|safe }}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form style="text-align: center;" method="POST" class="col-4">
+            <div class="form-group">
+                <label for="product_name" class="text-white">Add Product</label>
+                <input type="text" class="form-control" id="product_name" name="product_name"
+                       placeholder="Enter Product Name">
+            </div>
+            <div class="form-group">
+                <label for="product_cost" class="text-white">Cost</label>
+                <input type="number" step="'0.01" class="form-control" id="product_cost" name="product_cost">
+            </div>
+            <button type="submit" class="btn btn-success" name="btn" value="add">Add</button>
+        </form>
+    </div>
+</div>
+<script>
+if ( window.history.replaceState ) {
+  window.history.replaceState( null, null, window.location.href );
+}
+
+
+
+
+
+
+
+
+
+</script>
+
+{% endblock %}

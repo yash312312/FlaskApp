@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block body %}
+<body class="bg-gradient-primary">
+
+
+<!-- Outer Row -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="card shadow mt-3">
+            <div class="d-block card-header">
+                <div class="row">
+                    <h6 class="font-weight-bold text-primary col-4">Data Table of <span
+                            class="p-1 ml-2 bg-primary text-white rounded">{{city}}</span>
+                    </h6>
+                    <div class="col-4">
+                        <form action="/city_input" method="POST" enctype="multipart/form-data">
+                            <input type="file" name="city_data" class="btn btn-primary">
+                            <button type="submit" class="btn btn-success" value="upload" name="btn">Upload Excel File</button>
+
+                        </form>
+
+                    </div>
+                    <div class="col-4">
+                        <a href="/" class="p-1 ml-5 btn btn-success">
+                            <span class="text font-weight-bold">Back to Home Page</span>
+                        </a>
+                        <a href="/unit" class="p-1 ml-5 btn btn-success mt-1">
+                            <span class="text font-weight-bold">Add Product</span>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+            <div id="product_table">
+                <div class="card-body">
+                    <a href="{{url_for('download_file')}}" class="">
+                        <button class='btn btn-success'>Download this data as Excel File</button>
+                    </a>
+                    <div class="table-responsive">
+                        {% for table in tables %}
+                        {{titles[loop.index]}}
+                        {{ table|safe }}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow mt-3">
+
+    </div>
+</div>
+<script>
+if ( window.history.replaceState ) {
+  window.history.replaceState( null, null, window.location.href );
+}
+
+</script>
+
+{% endblock %}
